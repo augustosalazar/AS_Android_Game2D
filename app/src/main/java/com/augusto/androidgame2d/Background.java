@@ -12,6 +12,7 @@ public class Background {
 
     public Background(Bitmap bitmap){
         this.image = bitmap;
+        dx = GamePanel.MOVESPEED;
     }
 
     public void update(){
@@ -29,7 +30,5 @@ public class Background {
             canvas.drawBitmap(image,x+GamePanel.WIDTH,y,null);
         }
     }
-    public void setVector(int dx){
-        this.dx = dx;
-    }
+
 }

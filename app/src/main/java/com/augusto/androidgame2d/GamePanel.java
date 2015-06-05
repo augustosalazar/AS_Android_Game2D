@@ -13,9 +13,10 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     public static final int WIDTH = 856;
     public static final int HEIGHT = 480;
+    public static final int MOVESPEED = -5;
     private MainThread thread;
     private Background bg;
-
+    private Player player;
 
     public GamePanel(Context context) {
         super(context);
@@ -23,7 +24,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         // add the callaback
         getHolder().addCallback(this);
 
-        thread = new MainThread(getHolder(),this);
+        thread = new MainThread(getHolder(), this);
         setFocusable(true);
     }
 
@@ -35,11 +36,11 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         boolean retry = true;
-        while(retry){
+        while (retry) {
             try {
                 thread.setRunning(false);
                 thread.join();
-            }catch (InterruptedException e){
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             retry = false;
@@ -49,30 +50,53 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        bg = new Background(BitmapFactory.decodeResource(getResources(),R.drawable.grassbg1));
-        bg.setVector(-5);
+        bg = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.grassbg1));
+        player = new Player(BitmapFactory.decodeResource(getResources(), R.drawable.helicopter), 65, 25, 3);
         thread.setRunning(true);
         thread.start();
+
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            System.out.println("Going up");
+            if (!player.getPlaying()) {
+                player.setPlaying(true);
+            } else {
+                player.setUp(true);
+            }
+            return true;
+        }
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            System.out.println("Going down");
+            player.setUp(false);
+            return true;
+        }
+
         return super.onTouchEvent(event);
     }
 
     public void update() {
-        bg.update();
+        if (player.getPlaying()) {
+            bg.update();
+            player.update();
+        }
     }
 
     @Override
     public void draw(Canvas canvas) {
-        final float scaleFactorX = (float)getWidth()/WIDTH;
-        final float scaleFactorY = (float)getHeight()/HEIGHT;
+        final float scaleFactorX = (float) getWidth() / (WIDTH*1.f);
+        final float scaleFactorY = (float) getHeight() / (HEIGHT*1.f);
         if (canvas != null) {
             final int savedState = canvas.save();
-            canvas.scale(scaleFactorX,scaleFactorY);
+            canvas.scale(scaleFactorX, scaleFactorY);
             bg.draw(canvas);
+            player.draw(canvas);
             canvas.restoreToCount(savedState);
         }
     }
+
+
 }
